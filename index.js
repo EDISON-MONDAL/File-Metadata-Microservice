@@ -1,8 +1,6 @@
 var express = require('express');
 var cors = require('cors');
 require('dotenv').config()
-const multer = require('multer');
-const path = require('path');
 
 var app = express();
 
@@ -15,31 +13,18 @@ app.get('/', function (req, res) {
 
 
 
-// Set up the multer storage and file filter
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // specify the folder where uploaded files will be stored
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  },
-});
+app.post("/api/fileanalyse",upload.single('upfile'),(req,res)=>{
+  const file = req.file;
+  res.json({
+    name: file.originalname,
+    type: file.mimetype,
+    size: file.size,
+  });
+})
 
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5 MB
-  fileFilter: (req, file, cb) => {
-    const allowedFileTypes = /jpeg|jpg|png|gif/; // Specify allowed file types
-    const extname = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedFileTypes.test(file.mimetype);
-    if (extname && mimetype) {
-      return cb(null, true);
-    } else {
-      cb('Error: Only image files (jpeg, jpg, png, gif) are allowed!');
-    }
-  },
-});
+
+const multer = require("multer");
+var upload=multer({dest:"uploads/"});
 
 
 
